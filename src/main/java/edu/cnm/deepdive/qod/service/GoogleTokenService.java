@@ -42,9 +42,9 @@ public class GoogleTokenService implements ResourceServerTokenServices {
   @Override
   public OAuth2Authentication loadAuthentication(String token)
       throws AuthenticationException, InvalidTokenException {
-    HttpTransport transport = new NetHttpTransport();
-    JacksonFactory jacksonFactory = new JacksonFactory();
-    GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jacksonFactory)
+    HttpTransport transport  = new NetHttpTransport();
+    JacksonFactory jsonFactory = new JacksonFactory();
+    GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
         .setAudience(Collections.singletonList(clientId))
         .build();
     GoogleIdToken idToken = null;
@@ -55,14 +55,11 @@ public class GoogleTokenService implements ResourceServerTokenServices {
     }
     if (idToken != null) {
       Payload payload = idToken.getPayload();
-      String oauthKey = payload
-          .getSubject(); // TODO  Get any additional needed info from payload for current user.
+      String oauthKey = payload.getSubject(); // TODO Get any additional needed info from payload for current user.
       // TODO Make a request of user service.
       Collection<GrantedAuthority> grants =
           Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
-      Authentication base =
-          new UsernamePasswordAuthenticationToken(oauthKey, token,
-              grants); // TODO Use user object retrieved from user service.
+      Authentication base = new UsernamePasswordAuthenticationToken(oauthKey, token, grants); // TODO Use user object retrieved from user service, instead of oauthKey.
       OAuth2Request request = converter.extractAuthentication(payload).getOAuth2Request();
       return new OAuth2Authentication(request, base);
     } else {
@@ -74,4 +71,5 @@ public class GoogleTokenService implements ResourceServerTokenServices {
   public OAuth2AccessToken readAccessToken(String s) {
     return null;
   }
+
 }
